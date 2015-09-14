@@ -1,0 +1,24 @@
+- hosts: localhost
+  connection: local
+  tasks:
+
+  - name: launch ansible cloudformation example
+    cloudformation:
+      stack_name: test-1
+      state: present
+      region: us-east-1
+      disable_rollback: true
+      template: ansible_training_cf.json
+      template_parameters:
+        KeyName: "jmartin"
+      tags:
+        Stack: test
+    register: cf
+
+  - debug: var=cf.stack_outputs.AnsibleTrainingTable
+
+  - ini_file: dest=/tmp/cfn.conf section=drinks option=fav value={{ cf.stack_outputs.AnsibleTrainingTable }} mode=0600 backup=yes
+
+  - copy:
+      content: "{{ cf.stack_outputs.AnsibleTrainingTable }}"
+      dest: /tmp/cfn
